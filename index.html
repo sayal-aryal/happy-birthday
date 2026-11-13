@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Celebration!</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+            handwriting: ['Dancing Script', 'cursive'],
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'flicker': 'flicker 0.15s ease-in-out infinite alternate',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-15px) rotate(3deg)' },
+            },
+            flicker: {
+              '0%': { transform: 'scale(1) rotate(-2deg)', opacity: '0.9' },
+              '100%': { transform: 'scale(1.15) rotate(2deg)', opacity: '1' },
+            },
+            glow: {
+              '0%': { filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.7))' },
+              '100%': { filter: 'drop-shadow(0 0 20px rgba(245, 158, 11, 0.95))' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Canvas & UI Polish */
+    body {
+      background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+      color: #f8fafc;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    #bg-canvas, #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #bg-canvas { z-index: 0; }
+    #confetti-canvas { z-index: 40; }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* Flame Styles */
+    .flame-element {
+      transform-origin: center bottom;
+      transition: all 0.3s ease;
+    }
+
+    .candle-wick {
+      width: 3px;
+      height: 10px;
+      background: #475569;
+      margin: 0 auto;
+    }
+
+    .candle-smoke {
+      position: absolute;
+      width: 8px;
+      height: 20px;
+      background: rgba(200, 200, 200, 0.4);
+      border-radius: 50%;
+      filter: blur(4px);
+      animation: smoke 1.2s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes smoke {
+      0% { opacity: 0.8; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(3); }
+    }
+  </style>
+</head>
+<body class="relative font-sans antialiased text-slate-100 flex flex-col min-h-screen">
+
+  <!-- Background Animated Balloons Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Foreground Celebration Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Main Responsive Container -->
+  <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4 sm:p-6 md:p-10 max-w-4xl mx-auto w-full">
+
+    <!-- Top Bar Navigation & Controls -->
+    <header class="w-full flex justify-between items-center mb-6 sm:mb-8">
+      <div class="flex items-center gap-2 glass-pill px-4 py-2 rounded-full text-xs sm:text-sm text-amber-300 font-semibold shadow-lg">
+        <i class="fa-solid fa-cake-candles animate-bounce"></i>
+        <span>Birthday Celebration</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="toggle-sound-btn" class="glass-pill hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition" title="Toggle Music Synth">
+          <i id="sound-icon" class="fa-solid fa-volume-high text-amber-400"></i>
+        </button>
+        <button id="open-share-btn" class="glass-pill hover:bg-white/20 text-white px-4 py-2 rounded-full flex items-center gap-2 text-xs sm:text-sm font-medium transition shadow-lg">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+          <span>Customize & Share</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Interactive Birthday Cake Container -->
+    <section class="glass-card rounded-3xl p-6 sm:p-10 w-full mb-8 flex flex-col items-center text-center relative overflow-hidden">
+
+      <div class="absolute -top-24 -left-24 w-48 h-48 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Header Title -->
+      <h1 id="recipient-heading" class="font-handwriting text-4xl sm:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-pink-300 to-amber-400 mb-2 drop-shadow">
+        Happy Birthday!
+      </h1>
+      <p class="text-slate-300 text-xs sm:text-sm mb-6 max-w-md">
+        Make a wish and blow out all 5 candles on your cake!
+      </p>
+
+      <!-- SVG Birthday Cake with 5 Candles -->
+      <div class="relative my-4 select-none flex flex-col items-center justify-center">
+
+        <!-- Candle Array Container -->
+        <div class="flex justify-center items-end gap-5 sm:gap-8 mb-[-12px] z-20">
+
+          <!-- Candle 1 -->
+          <div class="candle-wrapper cursor-pointer group flex flex-col items-center" data-candle="0">
+            <div class="relative flex flex-col items-center">
+              <div class="candle-flame flame-element animate-flicker animate-glow">
+                <svg width="24" height="36" viewBox="0 0 24 36" fill="none">
+                  <path d="M12 0C12 0 24 14 24 24C24 30.6274 18.6274 36 12 36C5.37258 36 0 30.6274 0 24C0 14 12 0 12 0Z" fill="url(#flameGrad1)" />
+                  <path d="M12 10C12 10 18 18 18 24C18 27.3137 15.3137 30 12 30C8.68629 30 6 27.3137 6 24C6 18 12 10 12 10Z" fill="#FBBF24" />
+                  <defs>
+                    <radialGradient id="flameGrad1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 18) scale(12 18)">
+                      <stop stop-color="#FFF7ED" />
+                      <stop offset="0.4" stop-color="#F59E0B" />
+                      <stop offset="1" stop-color="#EF4444" />
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="candle-wick"></div>
+            </div>
+            <div class="w-4 h-16 sm:w-5 sm:h-20 bg-gradient-to-b from-pink-400 via-rose-500 to-pink-600 rounded-t-md shadow-md border-t border-pink-300 relative overflow-hidden">
+              <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:6px_6px]"></div>
+            </div>
+          </div>
+
+          <!-- Candle 2 -->
+          <div class="candle-wrapper cursor-pointer group flex flex-col items-center" data-candle="1">
+            <div class="relative flex flex-col items-center">
+              <div class="candle-flame flame-element animate-flicker animate-glow">
+                <svg width="24" height="36" viewBox="0 0 24 36" fill="none">
+                  <path d="M12 0C12 0 24 14 24 24C24 30.6274 18.6274 36 12 36C5.37258 36 0 30.6274 0 24C0 14 12 0 12 0Z" fill="url(#flameGrad2)" />
+                  <path d="M12 10C12 10 18 18 18 24C18 27.3137 15.3137 30 12 30C8.68629 30 6 27.3137 6 24C6 18 12 10 12 10Z" fill="#FBBF24" />
+                  <defs>
+                    <radialGradient id="flameGrad2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 18) scale(12 18)">
+                      <stop stop-color="#FFF7ED" />
+                      <stop offset="0.4" stop-color="#F59E0B" />
+                      <stop offset="1" stop-color="#EF4444" />
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="candle-wick"></div>
+            </div>
+            <div class="w-4 h-20 sm:w-5 sm:h-24 bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500 rounded-t-md shadow-md border-t border-yellow-200 relative overflow-hidden">
+              <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:6px_6px]"></div>
+            </div>
+          </div>
+
+          <!-- Candle 3 (Center - Slightly taller) -->
+          <div class="candle-wrapper cursor-pointer group flex flex-col items-center" data-candle="2">
+            <div class="relative flex flex-col items-center">
+              <div class="candle-flame flame-element animate-flicker animate-glow">
+                <svg width="26" height="38" viewBox="0 0 24 36" fill="none">
+                  <path d="M12 0C12 0 24 14 24 24C24 30.6274 18.6274 36 12 36C5.37258 36 0 30.6274 0 24C0 14 12 0 12 0Z" fill="url(#flameGrad3)" />
+                  <path d="M12 10C12 10 18 18 18 24C18 27.3137 15.3137 30 12 30C8.68629 30 6 27.3137 6 24C6 18 12 10 12 10Z" fill="#FBBF24" />
+                  <defs>
+                    <radialGradient id="flameGrad3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 18) scale(12 18)">
+                      <stop stop-color="#FFF7ED" />
+                      <stop offset="0.4" stop-color="#F59E0B" />
+                      <stop offset="1" stop-color="#EF4444" />
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="candle-wick"></div>
+            </div>
+            <div class="w-4 h-22 sm:w-5 sm:h-28 bg-gradient-to-b from-purple-400 via-indigo-500 to-purple-600 rounded-t-md shadow-md border-t border-purple-300 relative overflow-hidden">
+              <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:6px_6px]"></div>
+            </div>
+          </div>
+
+          <!-- Candle 4 -->
+          <div class="candle-wrapper cursor-pointer group flex flex-col items-center" data-candle="3">
+            <div class="relative flex flex-col items-center">
+              <div class="candle-flame flame-element animate-flicker animate-glow">
+                <svg width="24" height="36" viewBox="0 0 24 36" fill="none">
+                  <path d="M12 0C12 0 24 14 24 24C24 30.6274 18.6274 36 12 36C5.37258 36 0 30.6274 0 24C0 14 12 0 12 0Z" fill="url(#flameGrad4)" />
+                  <path d="M12 10C12 10 18 18 18 24C18 27.3137 15.3137 30 12 30C8.68629 30 6 27.3137 6 24C6 18 12 10 12 10Z" fill="#FBBF24" />
+                  <defs>
+                    <radialGradient id="flameGrad4" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 18) scale(12 18)">
+                      <stop stop-color="#FFF7ED" />
+                      <stop offset="0.4" stop-color="#F59E0B" />
+                      <stop offset="1" stop-color="#EF4444" />
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="candle-wick"></div>
+            </div>
+            <div class="w-4 h-20 sm:w-5 sm:h-24 bg-gradient-to-b from-emerald-300 via-teal-400 to-emerald-500 rounded-t-md shadow-md border-t border-emerald-200 relative overflow-hidden">
+              <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:6px_6px]"></div>
+            </div>
+          </div>
+
+          <!-- Candle 5 -->
+          <div class="candle-wrapper cursor-pointer group flex flex-col items-center" data-candle="4">
+            <div class="relative flex flex-col items-center">
+              <div class="candle-flame flame-element animate-flicker animate-glow">
+                <svg width="24" height="36" viewBox="0 0 24 36" fill="none">
+                  <path d="M12 0C12 0 24 14 24 24C24 30.6274 18.6274 36 12 36C5.37258 36 0 30.6274 0 24C0 14 12 0 12 0Z" fill="url(#flameGrad5)" />
+                  <path d="M12 10C12 10 18 18 18 24C18 27.3137 15.3137 30 12 30C8.68629 30 6 27.3137 6 24C6 18 12 10 12 10Z" fill="#FBBF24" />
+                  <defs>
+                    <radialGradient id="flameGrad5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 18) scale(12 18)">
+                      <stop stop-color="#FFF7ED" />
+                      <stop offset="0.4" stop-color="#F59E0B" />
+                      <stop offset="1" stop-color="#EF4444" />
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="candle-wick"></div>
+            </div>
+            <div class="w-4 h-16 sm:w-5 sm:h-20 bg-gradient-to-b from-sky-300 via-blue-400 to-sky-500 rounded-t-md shadow-md border-t border-sky-200 relative overflow-hidden">
+              <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:6px_6px]"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 3D Layered Cake Graphic -->
+        <div class="w-64 sm:w-80 flex flex-col items-center drop-shadow-2xl z-10">
+          <!-- Top Tier Frosting -->
+          <div class="w-full h-12 bg-gradient-to-r from-pink-300 via-rose-200 to-pink-300 rounded-t-3xl relative border-b-4 border-pink-400 flex items-center justify-around shadow-inner overflow-hidden">
+            <div class="w-8 h-8 rounded-full bg-pink-100 -mb-6 shadow-sm"></div>
+            <div class="w-8 h-8 rounded-full bg-pink-100 -mb-6 shadow-sm"></div>
+            <div class="w-8 h-8 rounded-full bg-pink-100 -mb-6 shadow-sm"></div>
+            <div class="w-8 h-8 rounded-full bg-pink-100 -mb-6 shadow-sm"></div>
+            <div class="w-8 h-8 rounded-full bg-pink-100 -mb-6 shadow-sm"></div>
+          </div>
+          <!-- Middle Sponge -->
+          <div class="w-[105%] h-14 bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 relative flex items-center justify-center border-b-4 border-amber-800 shadow-md">
+            <!-- Cream Layer inside -->
+            <div class="w-full h-3 bg-rose-200/90 my-auto"></div>
+          </div>
+          <!-- Bottom Tier Frosting & Details -->
+          <div class="w-[115%] h-16 bg-gradient-to-r from-pink-400 via-rose-300 to-pink-400 rounded-b-2xl relative shadow-xl flex items-center justify-around border-t-2 border-pink-200">
+            <span class="text-xl">🌸</span>
+            <span class="text-xl">✨</span>
+            <span class="text-xl">🍓</span>
+            <span class="text-xl">✨</span>
+            <span class="text-xl">🌸</span>
+          </div>
+          <!-- Cake Plate -->
+          <div class="w-[130%] h-4 bg-gradient-to-r from-slate-300 via-white to-slate-300 rounded-full shadow-2xl -mt-1 border-b-2 border-slate-400"></div>
+        </div>
+
+      </div>
+
+      <!-- Candles Status Indicator -->
+      <div id="candle-status" class="mt-4 text-xs sm:text-sm font-semibold text-amber-300 tracking-wider">
+        🔥 <span id="lit-count">5</span> / 5 Candles Glowing
+      </div>
+
+      <!-- Action Buttons Row (Relight, Blow in Mic, Blow All Out) -->
+      <div class="mt-6 flex flex-wrap justify-center items-center gap-3 sm:gap-4 w-full">
+        <!-- Relight Candles -->
+        <button id="relight-btn" class="px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-md active:scale-95">
+          <i class="fa-solid fa-rotate-right text-amber-400"></i>
+          <span>Relight Candles</span>
+        </button>
+
+        <!-- Blow in Microphone (Centered) -->
+        <button id="mic-blow-btn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-pink-500/30 transition flex items-center gap-2 active:scale-95 relative overflow-hidden group">
+          <i id="mic-icon" class="fa-solid fa-microphone text-amber-200"></i>
+          <span id="mic-btn-text">Blow in Microphone</span>
+          <!-- Pulsing mic indicator -->
+          <span id="mic-pulse" class="hidden absolute right-2 top-2 w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
+        </button>
+
+        <!-- Blow All Out -->
+        <button id="blow-all-btn" class="px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-md active:scale-95">
+          <i class="fa-solid fa-wind text-sky-400"></i>
+          <span>Blow All Out</span>
+        </button>
+      </div>
+
+      <!-- Audio Sensitivity Visualizer for Mic Blow -->
+      <div id="mic-visualizer-container" class="hidden w-full max-w-xs mt-3 flex items-center gap-2">
+        <i class="fa-solid fa-gauge-high text-xs text-slate-400"></i>
+        <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+          <div id="mic-level-bar" class="bg-gradient-to-r from-teal-400 to-amber-400 h-full w-0 transition-all duration-75"></div>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono" id="mic-status-lbl">Listening...</span>
+      </div>
+
+    </section>
+
+    <!-- Reframed Birthday Card Display Section -->
+    <section class="glass-card rounded-3xl p-6 sm:p-10 w-full relative">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-pink-500 flex items-center justify-center text-white text-lg font-bold shadow-md">
+            💌
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-white leading-tight">A Special Message For You</h2>
+            <p id="card-sender-sub" class="text-xs text-amber-300">From a well wisher</p>
+          </div>
+        </div>
+        <div class="text-2xl text-amber-400/40 font-serif">“</div>
+      </div>
+
+      <!-- Styled Birthday Message Block -->
+      <blockquote class="my-4 text-slate-100 text-base sm:text-lg leading-relaxed font-sans italic bg-slate-900/40 p-5 sm:p-6 rounded-2xl border-l-4 border-amber-400 shadow-inner relative">
+        <p id="birthday-message" class="relative z-10">
+          Even though we haven't talked much, from the few conversations we've had, you seem like a genuinely kind and smart person. Never lose your positive energy and cheerful vibe. Wishing you all the very best!
+        </p>
+      </blockquote>
+
+      <div class="flex flex-wrap items-center justify-between mt-6 pt-2 text-xs sm:text-sm text-slate-300">
+        <div class="flex items-center gap-2 font-handwriting text-2xl text-amber-300">
+          <span>With best wishes,</span>
+          <span id="card-signature" class="font-bold text-pink-300">Friends</span>
+        </div>
+        <div class="flex items-center gap-2 text-pink-400 font-medium">
+          <i class="fa-solid fa-heart animate-pulse"></i>
+          <span>Spread Positivity</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-xs text-slate-400">
+      <p>Interactive Birthday Card &bull; Click candles or use your microphone to blow them out!</p>
+    </footer>
+
+  </main>
+
+  <!-- Customize & Share Modal -->
+  <div id="custom-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl border border-white/20 animate-in fade-in zoom-in duration-200">
+      <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-6">
+        <div class="p-3 bg-amber-500/20 text-amber-300 rounded-2xl">
+          <i class="fa-solid fa-pen-to-square text-xl"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-white">Customize Birthday Card</h3>
+          <p class="text-xs text-slate-300">Personalize details and generate a custom link!</p>
+        </div>
+      </div>
+
+      <form id="customize-form" class="space-y-4 text-sm" onsubmit="return false;">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Recipient Name</label>
+          <input type="text" id="input-name" placeholder="e.g. Sarah" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-400 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Birthday Message</label>
+          <textarea id="input-msg" rows="4" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-400 transition">Even though we haven't talked much, from the few conversations we've had, you seem like a genuinely kind and smart person. Never lose your positive energy and cheerful vibe. Wishing you all the very best!</textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Your Name / Signature</label>
+          <input type="text" id="input-from" placeholder="e.g. Alex" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-400 transition">
+        </div>
+
+        <div class="pt-2 flex flex-col sm:flex-row gap-3">
+          <button id="apply-btn" type="button" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl border border-slate-600 transition">
+            Apply Now
+          </button>
+          <button id="copy-link-btn" type="button" class="flex-1 bg-gradient-to-r from-amber-400 to-pink-500 hover:from-amber-500 hover:to-pink-600 text-slate-950 font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+            <i class="fa-solid fa-link"></i>
+            <span>Copy Share Link</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 glass-card px-5 py-3 rounded-2xl border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold shadow-2xl flex items-center gap-3 transition-all transform translate-y-20 opacity-0 pointer-events-none">
+    <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+    <span id="toast-msg">Link copied to clipboard!</span>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // --- State Variables ---
+    const totalCandles = 5;
+    let candleStates = [true, true, true, true, true]; // true = lit, false = unlit
+    let audioCtx = null;
+    let micStream = null;
+    let micAnalyser = null;
+    let isListeningMic = false;
+    let micAnimFrame = null;
+    let isSoundMuted = false;
+    let synthPlaying = false;
+
+    // Default Custom Text
+    const defaultMsg = "Even though we haven't talked much, from the few conversations we've had, you seem like a genuinely kind and smart person. Never lose your positive energy and cheerful vibe. Wishing you all the very best!";
+    const defaultName = "Friend";
+    const defaultFrom = "A Well Wisher";
+
+    // --- DOM Elements ---
+    const candleWrappers = document.querySelectorAll('.candle-wrapper');
+    const litCountEl = document.getElementById('lit-count');
+    const relightBtn = document.getElementById('relight-btn');
+    const blowAllBtn = document.getElementById('blow-all-btn');
+    const micBlowBtn = document.getElementById('mic-blow-btn');
+    const micPulse = document.getElementById('mic-pulse');
+    const micVisualizer = document.getElementById('mic-visualizer-container');
+    const micLevelBar = document.getElementById('mic-level-bar');
+    const micStatusLbl = document.getElementById('mic-status-lbl');
+
+    const recipientHeading = document.getElementById('recipient-heading');
+    const birthdayMessage = document.getElementById('birthday-message');
+    const cardSenderSub = document.getElementById('card-sender-sub');
+    const cardSignature = document.getElementById('card-signature');
+
+    const openShareBtn = document.getElementById('open-share-btn');
+    const customModal = document.getElementById('custom-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const inputName = document.getElementById('input-name');
+    const inputMsg = document.getElementById('input-msg');
+    const inputFrom = document.getElementById('input-from');
+    const applyBtn = document.getElementById('apply-btn');
+    const copyLinkBtn = document.getElementById('copy-link-btn');
+
+    const toggleSoundBtn = document.getElementById('toggle-sound-btn');
+    const soundIcon = document.getElementById('sound-icon');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toast-msg');
+
+    // --- Background Balloons Canvas animation ---
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let balloons = [];
+
+    function resizeCanvases() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    class Balloon {
+      constructor() {
+        this.reset();
+        this.y = Math.random() * bgCanvas.height;
+      }
+      reset() {
+        this.x = Math.random() * bgCanvas.width;
+        this.y = bgCanvas.height + 60;
+        this.radius = 18 + Math.random() * 16;
+        this.speed = 0.6 + Math.random() * 1.2;
+        this.sway = Math.random() * 2;
+        this.swaySpeed = 0.01 + Math.random() * 0.02;
+        const colors = ['#f43f5e', '#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += Math.sin(this.y * this.swaySpeed) * 0.5;
+        if (this.y < -60) this.reset();
+      }
+      draw() {
+        bgCtx.save();
+        bgCtx.beginPath();
+        bgCtx.ellipse(this.x, this.y, this.radius, this.radius * 1.2, 0, 0, Math.PI * 2);
+        bgCtx.fillStyle = this.color;
+        bgCtx.globalAlpha = 0.45;
+        bgCtx.fill();
+
+        // String
+        bgCtx.beginPath();
+        bgCtx.moveTo(this.x, this.y + this.radius * 1.2);
+        bgCtx.lineTo(this.x + Math.sin(this.y * 0.05) * 8, this.y + this.radius * 1.2 + 25);
+        bgCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+        bgCtx.lineWidth = 1.5;
+        bgCtx.stroke();
+        bgCtx.restore();
+      }
+    }
+
+    function initBalloons() {
+      balloons = [];
+      const count = Math.min(Math.floor(window.innerWidth / 30), 30);
+      for (let i = 0; i < count; i++) {
+        balloons.push(new Balloon());
+      }
+    }
+
+    function animateBalloons() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      balloons.forEach(b => {
+        b.update();
+        b.draw();
+      });
+      requestAnimationFrame(animateBalloons);
+    }
+
+    // --- Confetti Explosion Canvas ---
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+    let confettiParticles = [];
+
+    class Confetti {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = 6 + Math.random() * 8;
+        this.vx = (Math.random() - 0.5) * 12;
+        this.vy = (Math.random() - 0.8) * 14;
+        this.gravity = 0.25;
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = (Math.random() - 0.5) * 10;
+        const colors = ['#f43f5e', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa', '#f472b6'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.opacity = 1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += this.gravity;
+        this.rotation += this.rotationSpeed;
+        this.opacity -= 0.008;
+      }
+      draw() {
+        confettiCtx.save();
+        confettiCtx.translate(this.x, this.y);
+        confettiCtx.rotate((this.rotation * Math.PI) / 180);
+        confettiCtx.globalAlpha = Math.max(0, this.opacity);
+        confettiCtx.fillStyle = this.color;
+        confettiCtx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size * 1.5);
+        confettiCtx.restore();
+      }
+    }
+
+    function triggerConfettiBurst() {
+      const startX = window.innerWidth / 2;
+      const startY = window.innerHeight * 0.4;
+      for (let i = 0; i < 120; i++) {
+        confettiParticles.push(new Confetti(startX, startY));
+      }
+    }
+
+    function animateConfetti() {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiParticles = confettiParticles.filter(p => p.opacity > 0);
+      confettiParticles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateConfetti);
+    }
+
+    // --- Web Audio Synthesizer ("Happy Birthday To You") ---
+    function playHappyBirthdaySong() {
+      if (isSoundMuted || synthPlaying) return;
+      synthPlaying = true;
+
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtxClass) return;
+      const ctx = new AudioCtxClass();
+
+      // Melody Notes (Pitch & Duration in seconds)
+      const notes = [
+        { note: 261.63, duration: 0.35 }, // C4
+        { note: 261.63, duration: 0.25 }, // C4
+        { note: 293.66, duration: 0.6 },  // D4
+        { note: 261.63, duration: 0.6 },  // C4
+        { note: 349.23, duration: 0.6 },  // F4
+        { note: 329.63, duration: 1.0 },  // E4
+
+        { note: 261.63, duration: 0.35 }, // C4
+        { note: 261.63, duration: 0.25 }, // C4
+        { note: 293.66, duration: 0.6 },  // D4
+        { note: 261.63, duration: 0.6 },  // C4
+        { note: 392.00, duration: 0.6 },  // G4
+        { note: 349.23, duration: 1.0 },  // F4
+
+        { note: 261.63, duration: 0.35 }, // C4
+        { note: 261.63, duration: 0.25 }, // C4
+        { note: 523.25, duration: 0.6 },  // C5
+        { note: 440.00, duration: 0.6 },  // A4
+        { note: 349.23, duration: 0.6 },  // F4
+        { note: 329.63, duration: 0.6 },  // E4
+        { note: 293.66, duration: 0.8 },  // D4
+
+        { note: 466.16, duration: 0.35 }, // A#4
+        { note: 466.16, duration: 0.25 }, // A#4
+        { note: 440.00, duration: 0.6 },  // A4
+        { note: 349.23, duration: 0.6 },  // F4
+        { note: 392.00, duration: 0.6 },  // G4
+        { note: 349.23, duration: 1.2 }   // F4
+      ];
+
+      let startTime = ctx.currentTime + 0.1;
+
+      notes.forEach((item) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(item.note, startTime);
+
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.25, startTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + item.duration - 0.05);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + item.duration);
+
+        startTime += item.duration + 0.05;
+      });
+
+      setTimeout(() => {
+        synthPlaying = false;
+      }, (startTime - ctx.currentTime) * 1000);
+    }
+
+    // --- Interactive Candle Extinguish & Relight ---
+    function extinguishCandle(index, isUserAction = true) {
+      if (!candleStates[index]) return; // already unlit
+
+      candleStates[index] = false;
+      const wrapper = candleWrappers[index];
+      const flame = wrapper.querySelector('.candle-flame');
+
+      // Hide Flame
+      flame.style.opacity = '0';
+      flame.style.transform = 'scale(0)';
+
+      // Smoke Effect
+      const smoke = document.createElement('div');
+      smoke.className = 'candle-smoke';
+      wrapper.querySelector('.relative').appendChild(smoke);
+      setTimeout(() => smoke.remove(), 1200);
+
+      updateCandleUI();
+      checkAllBlownOut();
+    }
+
+    function relightCandles() {
+      candleStates = [true, true, true, true, true];
+      candleWrappers.forEach(wrapper => {
+        const flame = wrapper.querySelector('.candle-flame');
+        flame.style.opacity = '1';
+        flame.style.transform = 'scale(1)';
+      });
+      updateCandleUI();
+      showToast("All candles relit! 🔥");
+    }
+
+    function blowAllOut() {
+      for (let i = 0; i < totalCandles; i++) {
+        extinguishCandle(i, false);
+      }
+    }
+
+    function updateCandleUI() {
+      const litCount = candleStates.filter(Boolean).length;
+      litCountEl.textContent = litCount;
+    }
+
+    function checkAllBlownOut() {
+      const litCount = candleStates.filter(Boolean).length;
+      if (litCount === 0) {
+        triggerConfettiBurst();
+        playHappyBirthdaySong();
+        showToast("🎉 Wish Granted! Happy Birthday!");
+      }
+    }
+
+    // Candle Click Event
+    candleWrappers.forEach((wrapper, index) => {
+      wrapper.addEventListener('click', () => extinguishCandle(index));
+    });
+
+    relightBtn.addEventListener('click', relightCandles);
+    blowAllBtn.addEventListener('click', blowAllOut);
+
+    // --- Microphone Blow Detection Logic ---
+    async function toggleMicrophone() {
+      if (isListeningMic) {
+        stopMicrophone();
+        return;
+      }
+
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtxClass();
+        micAnalyser = audioCtx.createAnalyser();
+        micAnalyser.fftSize = 256;
+
+        const source = audioCtx.createMediaStreamSource(micStream);
+        source.connect(micAnalyser);
+
+        isListeningMic = true;
+        micBlowBtn.classList.add('ring-2', 'ring-pink-300');
+        micPulse.classList.remove('hidden');
+        micVisualizer.classList.remove('hidden');
+        micStatusLbl.textContent = "Listening... Blow into mic!";
+        showToast("Microphone active! Blow hard to extinguish!");
+
+        detectMicBlow();
+      } catch (err) {
+        showToast("Mic access denied or unavailable.");
+        console.error("Microphone error:", err);
+      }
+    }
+
+    function stopMicrophone() {
+      isListeningMic = false;
+      if (micAnimFrame) cancelAnimationFrame(micAnimFrame);
+      if (micStream) {
+        micStream.getTracks().forEach(track => track.stop());
+        micStream = null;
+      }
+      if (audioCtx) {
+        audioCtx.close();
+        audioCtx = null;
+      }
+      micBlowBtn.classList.remove('ring-2', 'ring-pink-300');
+      micPulse.classList.add('hidden');
+      micVisualizer.classList.add('hidden');
+      micLevelBar.style.width = '0%';
+    }
+
+    function detectMicBlow() {
+      if (!isListeningMic || !micAnalyser) return;
+
+      const dataArray = new Uint8Array(micAnalyser.frequencyBinCount);
+      micAnalyser.getByteFrequencyData(dataArray);
+
+      // Average loudness in low-mid frequencies typical for blowing air
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const average = sum / dataArray.length;
+
+      // Update Visualizer Bar
+      const percentage = Math.min(100, Math.round((average / 100) * 100));
+      micLevelBar.style.width = percentage + '%';
+
+      // Blow threshold trigger
+      if (average > 45) {
+        // Extinguish lit candles one by one or randomly as blow continues
+        const litIndices = candleStates
+          .map((isLit, idx) => isLit ? idx : null)
+          .filter(idx => idx !== null);
+
+        if (litIndices.length > 0) {
+          const randomIndex = litIndices[Math.floor(Math.random() * litIndices.length)];
+          extinguishCandle(randomIndex);
+        }
+      }
+
+      micAnimFrame = requestAnimationFrame(detectMicBlow);
+    }
+
+    micBlowBtn.addEventListener('click', toggleMicrophone);
+
+    // --- Sound Mute Toggle ---
+    toggleSoundBtn.addEventListener('click', () => {
+      isSoundMuted = !isSoundMuted;
+      if (isSoundMuted) {
+        soundIcon.className = 'fa-solid fa-volume-xmark text-slate-400';
+        showToast("Melody sound muted");
+      } else {
+        soundIcon.className = 'fa-solid fa-volume-high text-amber-400';
+        showToast("Melody sound unmuted");
+      }
+    });
+
+    // --- URL Parameters Handler & Customization ---
+    function loadURLParameters() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const nameParam = urlParams.get('name');
+      const msgParam = urlParams.get('msg');
+      const fromParam = urlParams.get('from');
+
+      const name = nameParam ? nameParam.trim() : defaultName;
+      const msg = msgParam ? msgParam.trim() : defaultMsg;
+      const from = fromParam ? fromParam.trim() : defaultFrom;
+
+      updateCardContent(name, msg, from);
+    }
+
+    function updateCardContent(name, msg, from) {
+      recipientHeading.textContent = `Happy Birthday, ${name}!`;
+      birthdayMessage.textContent = msg;
+      cardSignature.textContent = from;
+      cardSenderSub.textContent = `From ${from}`;
+
+      // Populate Modal inputs
+      inputName.value = name === defaultName ? "" : name;
+      inputMsg.value = msg;
+      inputFrom.value = from === defaultFrom ? "" : from;
+    }
+
+    // Modal Control
+    openShareBtn.addEventListener('click', () => customModal.classList.remove('hidden'));
+    closeModalBtn.addEventListener('click', () => customModal.classList.add('hidden'));
+
+    customModal.addEventListener('click', (e) => {
+      if (e.target === customModal) customModal.classList.add('hidden');
+    });
+
+    applyBtn.addEventListener('click', () => {
+      const name = inputName.value.trim() || defaultName;
+      const msg = inputMsg.value.trim() || defaultMsg;
+      const from = inputFrom.value.trim() || defaultFrom;
+      updateCardContent(name, msg, from);
+      customModal.classList.add('hidden');
+      showToast("Card details updated!");
+    });
+
+    copyLinkBtn.addEventListener('click', () => {
+      const name = inputName.value.trim() || defaultName;
+      const msg = inputMsg.value.trim() || defaultMsg;
+      const from = inputFrom.value.trim() || defaultFrom;
+
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareUrl = `${baseUrl}?name=${encodeURIComponent(name)}&msg=${encodeURIComponent(msg)}&from=${encodeURIComponent(from)}`;
+
+      // Fallback copy execution for browser compatibility
+      const dummyInput = document.createElement('input');
+      document.body.appendChild(dummyInput);
+      dummyInput.value = shareUrl;
+      dummyInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummyInput);
+
+      showToast("Shareable link copied to clipboard! 📋");
+    });
+
+    // --- Toast Notifications ---
+    let toastTimeout = null;
+    function showToast(text) {
+      toastMsg.textContent = text;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    // --- Window Init ---
+    window.onload = function() {
+      resizeCanvases();
+      initBalloons();
+      animateBalloons();
+      animateConfetti();
+      loadURLParameters();
+
+      window.addEventListener('resize', () => {
+        resizeCanvases();
+        initBalloons();
+      });
+    };
+  </script>
+
+</body>
+</html>
