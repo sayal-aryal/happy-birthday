@@ -133,10 +133,6 @@
         <button id="toggle-sound-btn" class="glass-pill hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition" title="Toggle Music Synth">
           <i id="sound-icon" class="fa-solid fa-volume-high text-amber-400"></i>
         </button>
-        <button id="open-share-btn" class="glass-pill hover:bg-white/20 text-white px-4 py-2 rounded-full flex items-center gap-2 text-xs sm:text-sm font-medium transition shadow-lg">
-          <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
-          <span>Customize & Share</span>
-        </button>
       </div>
     </header>
 
@@ -345,38 +341,66 @@
 
     </section>
 
-    <!-- Reframed Birthday Card Display Section -->
-    <section class="glass-card rounded-3xl p-6 sm:p-10 w-full relative">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-pink-500 flex items-center justify-center text-white text-lg font-bold shadow-md">
-            💌
-          </div>
-          <div>
-            <h2 class="text-base sm:text-lg font-bold text-white leading-tight">A Special Message For You</h2>
-            <p id="card-sender-sub" class="text-xs text-amber-300">From a well wisher</p>
-          </div>
-        </div>
-        <div class="text-2xl text-amber-400/40 font-serif">“</div>
-      </div>
+    <!-- Wrapped Interactive Birthday Message Gift Box Section -->
+    <section id="message-section" class="w-full relative">
 
-      <!-- Styled Birthday Message Block -->
-      <blockquote class="my-4 text-slate-100 text-base sm:text-lg leading-relaxed font-sans italic bg-slate-900/40 p-5 sm:p-6 rounded-2xl border-l-4 border-amber-400 shadow-inner relative">
-        <p id="birthday-message" class="relative z-10">
-          Even though we haven't talked much, from the few conversations we've had, you seem like a genuinely kind and smart person. Never lose your positive energy and cheerful vibe. Wishing you all the very best!
+      <!-- Closed Gift Box Cover (Visible initially) -->
+      <div id="gift-box-closed" class="glass-card rounded-3xl p-8 w-full flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-400/50 transition-all duration-300 group shadow-2xl relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-amber-500/10 to-purple-500/10 opacity-50 group-hover:opacity-100 transition duration-500"></div>
+
+        <!-- Animated Gift Box Icon -->
+        <div class="relative mb-4">
+          <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 via-pink-500 to-rose-600 flex items-center justify-center text-4xl shadow-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 animate-bounce">
+            🎁
+          </div>
+          <span class="absolute -top-1 -right-1 flex h-4 w-4">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-amber-500"></span>
+          </span>
+        </div>
+
+        <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">
+          You Have a Special Message!
+        </h3>
+        <p class="text-xs sm:text-sm text-amber-200/90 font-medium flex items-center gap-2">
+          <span>Tap to unwrap your card</span>
+          <i class="fa-solid fa-hand-pointer text-xs animate-pulse"></i>
         </p>
-      </blockquote>
+      </div>
 
-      <div class="flex flex-wrap items-center justify-between mt-6 pt-2 text-xs sm:text-sm text-slate-300">
-        <div class="flex items-center gap-2 font-handwriting text-2xl text-amber-300">
-          <span>With best wishes,</span>
-          <span id="card-signature" class="font-bold text-pink-300">Friends</span>
+      <!-- Opened Message Card (Hidden initially, reveals when clicked) -->
+      <div id="gift-box-opened" class="hidden glass-card rounded-3xl p-6 sm:p-10 w-full relative transform transition-all duration-500 scale-95 opacity-0">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-pink-500 flex items-center justify-center text-white text-lg font-bold shadow-md">
+              💌
+            </div>
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-white leading-tight">A Special Message For You</h2>
+              <p id="card-sender-sub" class="text-xs text-amber-300">Your Well Wisher</p>
+            </div>
+          </div>
+          <button id="close-msg-btn" class="text-slate-400 hover:text-white text-sm px-2.5 py-1 rounded-lg hover:bg-white/10 transition flex items-center gap-1" title="Pack card back">
+            <i class="fa-solid fa-box-archive text-xs"></i>
+            <span class="text-xs">Close</span>
+          </button>
         </div>
-        <div class="flex items-center gap-2 text-pink-400 font-medium">
-          <i class="fa-solid fa-heart animate-pulse"></i>
-          <span>Spread Positivity</span>
+
+        <!-- Styled Birthday Message Block -->
+        <blockquote class="my-4 text-slate-100 text-base sm:text-lg leading-relaxed font-sans italic bg-slate-900/40 p-5 sm:p-6 rounded-2xl border-l-4 border-amber-400 shadow-inner relative">
+          <p id="birthday-message" class="relative z-10">
+            Even though we haven't talked much, from the few conversations we've had, you seem like a genuinely kind and smart person. Never lose your positive energy and cheerful vibe. Wishing you all the very best!
+          </p>
+        </blockquote>
+
+        <div class="flex flex-wrap items-center justify-between mt-6 pt-2 text-xs sm:text-sm text-slate-300">
+          <div class="flex items-center gap-2 font-handwriting text-2xl text-amber-300">
+            <span>With best wishes,</span>
+            <span id="card-signature" class="font-bold text-pink-300">Your Well Wisher</span>
+          </div>
         </div>
       </div>
+
     </section>
 
     <!-- Footer -->
@@ -386,56 +410,10 @@
 
   </main>
 
-  <!-- Customize & Share Modal -->
-  <div id="custom-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl border border-white/20 animate-in fade-in zoom-in duration-200">
-      <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex items-center gap-3 mb-6">
-        <div class="p-3 bg-amber-500/20 text-amber-300 rounded-2xl">
-          <i class="fa-solid fa-pen-to-square text-xl"></i>
-        </div>
-        <div>
-          <h3 class="text-xl font-bold text-white">Customize Birthday Card</h3>
-          <p class="text-xs text-slate-300">Personalize details and generate a custom link!</p>
-        </div>
-      </div>
-
-      <form id="customize-form" class="space-y-4 text-sm" onsubmit="return false;">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Recipient Name</label>
-          <input type="text" id="input-name" placeholder="e.g. Sarah" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-400 transition">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Birthday Message</label>
-          <textarea id="input-msg" rows="4" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-400 transition">Even though we haven't talked much, from the few conversations we've had, you seem like a genuinely kind and smart person. Never lose your positive energy and cheerful vibe. Wishing you all the very best!</textarea>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Your Name / Signature</label>
-          <input type="text" id="input-from" placeholder="e.g. Alex" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-400 transition">
-        </div>
-
-        <div class="pt-2 flex flex-col sm:flex-row gap-3">
-          <button id="apply-btn" type="button" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl border border-slate-600 transition">
-            Apply Now
-          </button>
-          <button id="copy-link-btn" type="button" class="flex-1 bg-gradient-to-r from-amber-400 to-pink-500 hover:from-amber-500 hover:to-pink-600 text-slate-950 font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
-            <i class="fa-solid fa-link"></i>
-            <span>Copy Share Link</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <!-- Notification Toast -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 glass-card px-5 py-3 rounded-2xl border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold shadow-2xl flex items-center gap-3 transition-all transform translate-y-20 opacity-0 pointer-events-none">
     <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-    <span id="toast-msg">Link copied to clipboard!</span>
+    <span id="toast-msg">Notification</span>
   </div>
 
   <!-- JavaScript Logic -->
@@ -453,8 +431,8 @@
 
     // Default Custom Text
     const defaultMsg = "Even though we haven't talked much, from the few conversations we've had, you seem like a genuinely kind and smart person. Never lose your positive energy and cheerful vibe. Wishing you all the very best!";
-    const defaultName = "Friend";
-    const defaultFrom = "A Well Wisher";
+    const defaultName = "Alisha";
+    const defaultFrom = "Your Well Wisher";
 
     // --- DOM Elements ---
     const candleWrappers = document.querySelectorAll('.candle-wrapper');
@@ -471,15 +449,6 @@
     const birthdayMessage = document.getElementById('birthday-message');
     const cardSenderSub = document.getElementById('card-sender-sub');
     const cardSignature = document.getElementById('card-signature');
-
-    const openShareBtn = document.getElementById('open-share-btn');
-    const customModal = document.getElementById('custom-modal');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const inputName = document.getElementById('input-name');
-    const inputMsg = document.getElementById('input-msg');
-    const inputFrom = document.getElementById('input-from');
-    const applyBtn = document.getElementById('apply-btn');
-    const copyLinkBtn = document.getElementById('copy-link-btn');
 
     const toggleSoundBtn = document.getElementById('toggle-sound-btn');
     const soundIcon = document.getElementById('sound-icon');
@@ -833,7 +802,59 @@
       }
     });
 
-    // --- URL Parameters Handler & Customization ---
+    // --- Message Gift Box Unwrap Logic ---
+    const giftBoxClosed = document.getElementById('gift-box-closed');
+    const giftBoxOpened = document.getElementById('gift-box-opened');
+    const closeMsgBtn = document.getElementById('close-msg-btn');
+
+    function openGiftBox() {
+      if (!giftBoxClosed || !giftBoxOpened) return;
+      giftBoxClosed.classList.add('hidden');
+      giftBoxOpened.classList.remove('hidden');
+      setTimeout(() => {
+        giftBoxOpened.classList.remove('scale-95', 'opacity-0');
+        giftBoxOpened.classList.add('scale-100', 'opacity-100');
+      }, 10);
+      playChimeSynth();
+      triggerConfettiBurst();
+      showToast("💌 Special message revealed!");
+    }
+
+    function closeGiftBox() {
+      if (!giftBoxClosed || !giftBoxOpened) return;
+      giftBoxOpened.classList.remove('scale-100', 'opacity-100');
+      giftBoxOpened.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        giftBoxOpened.classList.add('hidden');
+        giftBoxClosed.classList.remove('hidden');
+      }, 300);
+    }
+
+    if (giftBoxClosed) giftBoxClosed.addEventListener('click', openGiftBox);
+    if (closeMsgBtn) closeMsgBtn.addEventListener('click', closeGiftBox);
+
+    // Opening Chime Audio Synthesizer
+    function playChimeSynth() {
+      if (isSoundMuted) return;
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtxClass) return;
+      const ctx = new AudioCtxClass();
+      const frequencies = [523.25, 659.25, 783.99, 1046.50];
+      frequencies.forEach((freq, index) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.08);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + index * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.08 + 0.4);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + index * 0.08);
+        osc.stop(ctx.currentTime + index * 0.08 + 0.4);
+      });
+    }
+
+    // --- URL Parameters Handler ---
     function loadURLParameters() {
       const urlParams = new URLSearchParams(window.location.search);
       const nameParam = urlParams.get('name');
@@ -851,49 +872,8 @@
       recipientHeading.textContent = `Happy Birthday, ${name}!`;
       birthdayMessage.textContent = msg;
       cardSignature.textContent = from;
-      cardSenderSub.textContent = `From ${from}`;
-
-      // Populate Modal inputs
-      inputName.value = name === defaultName ? "" : name;
-      inputMsg.value = msg;
-      inputFrom.value = from === defaultFrom ? "" : from;
+      cardSenderSub.textContent = from;
     }
-
-    // Modal Control
-    openShareBtn.addEventListener('click', () => customModal.classList.remove('hidden'));
-    closeModalBtn.addEventListener('click', () => customModal.classList.add('hidden'));
-
-    customModal.addEventListener('click', (e) => {
-      if (e.target === customModal) customModal.classList.add('hidden');
-    });
-
-    applyBtn.addEventListener('click', () => {
-      const name = inputName.value.trim() || defaultName;
-      const msg = inputMsg.value.trim() || defaultMsg;
-      const from = inputFrom.value.trim() || defaultFrom;
-      updateCardContent(name, msg, from);
-      customModal.classList.add('hidden');
-      showToast("Card details updated!");
-    });
-
-    copyLinkBtn.addEventListener('click', () => {
-      const name = inputName.value.trim() || defaultName;
-      const msg = inputMsg.value.trim() || defaultMsg;
-      const from = inputFrom.value.trim() || defaultFrom;
-
-      const baseUrl = window.location.origin + window.location.pathname;
-      const shareUrl = `${baseUrl}?name=${encodeURIComponent(name)}&msg=${encodeURIComponent(msg)}&from=${encodeURIComponent(from)}`;
-
-      // Fallback copy execution for browser compatibility
-      const dummyInput = document.createElement('input');
-      document.body.appendChild(dummyInput);
-      dummyInput.value = shareUrl;
-      dummyInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(dummyInput);
-
-      showToast("Shareable link copied to clipboard! 📋");
-    });
 
     // --- Toast Notifications ---
     let toastTimeout = null;
